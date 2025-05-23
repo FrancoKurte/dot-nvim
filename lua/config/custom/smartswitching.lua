@@ -1,58 +1,4 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Basic Setup
-
--- tabs
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.smarttab = true
-vim.opt.smartindent = true
-vim.opt.autoindent = true
-
--- lines
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.cursorline = true
-
--- files
-vim.opt.undofile = true
-
--- case handling
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-
--- splits
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-
--- scrolling
-vim.api.nvim_create_autocmd("VimResized", {
-  callback = function()
-    local usable = vim.o.lines - vim.o.cmdheight - (vim.o.laststatus > 0 and 1 or 0)
-    vim.o.scrolloff = math.floor(usable / 2)
-  end,
-})
-vim.opt.cmdheight = 0
-
--- displaying characters
-vim.opt.list = true
-vim.opt.listchars = { tab = "--", trail = "-", nbsp = "-" }
-
--- key bindings
-
--- Next buffer & Previous buffer
-vim.keymap.set("n", "<Tab>", ":bnext<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<S-Tab>", ":bprevious<CR>", { noremap = true, silent = true })
-
--- Select all text in current buffer
-vim.keymap.set("n", "<C-a>", "ggVG", { noremap = true, silent = true })
-
--- Force closing everything, without saving
-vim.keymap.set("n", "<A-q>", ":qa!<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<A-0>", ":buffer 10<CR>", { noremap = true, silent = false, desc = "Switch to buffer 10" })
-
--- Smart buffer switching with Alt + number keys
+-- Smart buffer switching with Alt + number keys (Silent Version)
 -- Maps Alt+1 through Alt+9 to switch to the 1st through 9th listed buffer
 -- Alt+0 switches to the 10th buffer (if it exists)
 
@@ -73,43 +19,29 @@ end
 local function switch_to_buffer_by_position(position)
   local buffers = get_listed_buffers()
 
-  if #buffers == 0 then
-    vim.notify("No listed buffers available", vim.log.levels.WARN)
-    return
-  end
-
-  if position > #buffers then
-    vim.notify(
-      string.format("Only %d buffer(s) available, can't switch to position %d", #buffers, position),
-      vim.log.levels.WARN
-    )
+  -- If no buffers, or position is out of bounds, silently do nothing.
+  if #buffers == 0 or position <= 0 or position > #buffers then
     return
   end
 
   local target_buf = buffers[position]
 
-  -- Check if buffer is still valid and loaded
+  -- Check if buffer is still valid and loaded, then switch. Otherwise, do nothing.
   if vim.api.nvim_buf_is_valid(target_buf) then
     vim.api.nvim_set_current_buf(target_buf)
-
-    -- Optional: Show which buffer we switched to
-    local buf_name = vim.api.nvim_buf_get_name(target_buf)
-    local display_name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
-    vim.notify(string.format("Switched to buffer %d: %s", target_buf, display_name), vim.log.levels.INFO)
-  else
-    vim.notify(string.format("Buffer %d is no longer valid", target_buf), vim.log.levels.ERROR)
   end
+  -- If buffer not valid or other conditions not met, exits silently.
 end
 
--- Alternative function that shows a buffer picker when Alt+` is pressed
+-- Shows a buffer picker when Alt+` is pressed
 local function show_buffer_picker()
   local buffers = get_listed_buffers()
 
   if #buffers == 0 then
-    vim.notify("No listed buffers available", vim.log.levels.WARN)
-    return
+    return -- Silently return if no buffers to show
   end
 
+  -- These print statements are the core functionality of the picker
   print("Available buffers:")
   for i, buf in ipairs(buffers) do
     local buf_name = vim.api.nvim_buf_get_name(buf)
@@ -117,8 +49,7 @@ local function show_buffer_picker()
     local current_marker = buf == vim.api.nvim_get_current_buf() and " (current)" or ""
     print(string.format("  %d: [%d] %s%s", i, buf, display_name, current_marker))
   end
-
-  print("\nPress Alt+<number> to switch to that buffer, or any other key to cancel")
+  print("\nPress Alt+<number> to switch to that buffer")
 end
 
 -- Set up the keymaps for Alt+1 through Alt+9
@@ -127,7 +58,7 @@ for i = 1, 9 do
     switch_to_buffer_by_position(i)
   end, {
     noremap = true,
-    silent = false,
+    silent = true, -- Ensures the mapping itself is silent
     desc = "Switch to " .. i .. "th buffer in list",
   })
 end
@@ -137,14 +68,14 @@ vim.keymap.set("n", "<A-0>", function()
   switch_to_buffer_by_position(10)
 end, {
   noremap = true,
-  silent = false,
+  silent = true, -- Ensures the mapping itself is silent
   desc = "Switch to 10th buffer in list",
 })
 
 -- Bonus: Alt+` shows the buffer picker
 vim.keymap.set("n", "<A-`>", show_buffer_picker, {
   noremap = true,
-  silent = false,
+  silent = true, -- Function handles its own printing, mapping is silent
   desc = "Show numbered buffer list",
 })
 
@@ -153,24 +84,25 @@ vim.api.nvim_create_user_command("BufferList", function()
   local buffers = get_listed_buffers()
 
   if #buffers == 0 then
-    print("No listed buffers available")
-    return
+    return -- Silently return if no buffers to list
   end
 
+  -- These print statements are the core functionality of the command
   print("Buffer mappings (Alt+<number>):")
   for i, buf in ipairs(buffers) do
     local buf_name = vim.api.nvim_buf_get_name(buf)
     local display_name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
     local current_marker = buf == vim.api.nvim_get_current_buf() and " (current)" or ""
-    local key = i <= 9 and i or (i == 10 and "0" or "none")
+    local key = i <= 9 and i or (i == 10 and "0" or "none") -- 'none' for >10 is fine
     print(string.format("  Alt+%s: [%d] %s%s", key, buf, display_name, current_marker))
   end
 end, { desc = "Show current buffer mappings" })
 
 -- Debug function to understand your buffer situation
+-- This function's purpose is to print debug info, so its print statements remain.
 vim.api.nvim_create_user_command("BufferDebug", function()
   print("=== Buffer Debug Info ===")
-  print("All buffers (including unlisted):")
+  print("All buffers:")
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
     local buf_name = vim.api.nvim_buf_get_name(buf)
     local display_name = buf_name == "" and "[No Name]" or buf_name
@@ -183,6 +115,10 @@ vim.api.nvim_create_user_command("BufferDebug", function()
 
   print("\nListed buffers only:")
   local listed_buffers = get_listed_buffers()
+  if #listed_buffers == 0 then
+    print("  (No listed buffers)") -- Clarifies if this section is empty
+    -- No return needed here, loop below won't run
+  end
   for i, buf in ipairs(listed_buffers) do
     local buf_name = vim.api.nvim_buf_get_name(buf)
     local display_name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
