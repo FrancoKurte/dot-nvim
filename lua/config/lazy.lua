@@ -42,4 +42,4 @@ require("lazy").setup({
 })
 
 require("config.custom.highlight")
-require("config.custom.smartswitching")
+require("config.custom.smart_switch")
