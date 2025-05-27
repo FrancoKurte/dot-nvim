@@ -41,5 +41,5 @@ require("lazy").setup({
   },
 })
 
-require("config.custom.highlight")
-require("config.custom.smart_switch")
+require("config.custom.hl_yankpaste")
+require("config.custom.sb_switch")
