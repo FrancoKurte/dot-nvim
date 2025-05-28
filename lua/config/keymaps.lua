@@ -16,14 +16,6 @@ vim.opt.cmdheight = 0
 vim.opt.list = true
 vim.opt.listchars = { tab = "--", trail = "-", nbsp = "-" }
 
--- Dynamic scrolloff
-vim.api.nvim_create_autocmd("VimResized", {
-  callback = function()
-    local usable = vim.o.lines - vim.o.cmdheight - (vim.o.laststatus > 0 and 1 or 0)
-    vim.o.scrolloff = math.floor(usable / 2)
-  end,
-})
-
 -- Buffer navigation
 vim.keymap.set("n", "<Tab>", ":bnext<CR>", { silent = true })
 vim.keymap.set("n", "<S-Tab>", ":bprevious<CR>", { silent = true })
@@ -39,7 +31,7 @@ local function force_quit()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
   vim.cmd("qa!")
 end
-vim.keymap.set({ "n", "i", "v", "x", "s", "o", "c", "t" }, "<A-q>", force_quit, { silent = true })
+vim.keymap.set({ "n", "i", "v", "x", "s", "o", "c", "t" }, "<C-z>", force_quit, { silent = true })
 
 -- Diagnostics
 vim.keymap.set("n", "gl", function()

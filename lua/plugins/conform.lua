@@ -13,10 +13,6 @@ return {
       yaml = { "yamlfmt" },
       asm = { "asmfmt" },
     },
-    format_on_save = {
-      timeout_ms = 250,
-      lsp_format = "fallback",
-    },
     formatexpr = true,
     formatters = {
       stylua = {

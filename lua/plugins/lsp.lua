@@ -139,7 +139,7 @@ return {
           end, "[T]oggle Inlay [H]ints")
         end
 
-        -- Auto format on save (optional)
+        -- Auto format on save
         if client.supports_method("textDocument/formatting") then
           vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = event.buf,
@@ -336,7 +336,7 @@ return {
         },
       },
 
-      -- Additional servers based on your Mason installation
+      -- Additional servers
       bashls = {},
       dockerls = {},
       docker_compose_language_service = {},
@@ -356,15 +356,15 @@ return {
     -- Setup mason-tool-installer
     local ensure_installed = vim.tbl_keys(servers)
     vim.list_extend(ensure_installed, {
-      "stylua",    -- Lua formatter
-      "shfmt",     -- Shell formatter
-      "goimports", -- Go formatter
-      "asmfmt",    -- Assembly formatter
+      "stylua",
+      "shfmt",
+      "goimports",
+      "asmfmt",
     })
 
     require("mason-tool-installer").setup({
       ensure_installed = ensure_installed,
-      auto_update = false,
+      auto_update = true,
       run_on_start = true,
     })
 

@@ -1,9 +1,9 @@
 return {
   "yetone/avante.nvim",
   event = "VeryLazy",
-  version = false, -- Never set this to "*"!
+  version = false,
   opts = {
-    -- Core provider configuration for Gemini 2.0 Flash-Lite
+    -- Core provider configuration
     provider = "gemini",
     auto_suggestions = false,
 
@@ -16,13 +16,12 @@ return {
       support_paste_from_clipboard = true,
     },
 
-    -- Gemini configuration
+    -- Model configuration
     gemini = {
-      -- Use Gemini 2.0 Flash-Lite as requested
       model = "gemini-2.0-flash-lite",
-      temperature = 0.1, -- Low temperature for precise system programming
-      max_tokens = 8192, -- Increased for complex code analysis
-      timeout = 45000, -- Increased timeout for complex operations
+      temperature = 0.1,
+      max_tokens = 8192,
+      timeout = 45000,
     },
 
     -- Enhanced mappings for development workflow
@@ -66,12 +65,12 @@ return {
 
     -- Enhanced windows configuration for multi-file projects
     windows = {
-      position = "right", -- Better for wide monitors common in development
-      width = 35, -- Percentage of screen width
+      position = "right",
+      width = 30,
       sidebar_header = {
         enabled = true,
-        align = "center",
-        rounded = true,
+        align = "left",
+        rounded = false,
       },
       input = {
         prefix = "> ",
@@ -85,7 +84,7 @@ return {
         floating = false, -- Integrated experience
         start_insert = true,
         border = "rounded",
-        focus_on_apply = "ours", -- Default to keeping our changes
+        focus_on_apply = "ours",
       },
     },
 
@@ -118,12 +117,12 @@ return {
 
     -- Custom system prompts for different development contexts
     system_prompt = [[
-You are an expert systems programmer with deep knowledge of C, Go, Rust, and Linux development.
+You are an expert systems programmer with deep knowledge of C, Go, Rust, and Linux kernel.
 
 CORE PRINCIPLES:
 - Prioritize code safety, performance, and maintainability
 - Follow language-specific best practices and idioms
-- Consider memory management, concurrency, and system resource usage
+- Consider cpu cycles, memory management, concurrency, and system resource usage
 - Provide production-ready, well-documented code
 - Explain complex system concepts clearly
 
@@ -141,6 +140,8 @@ DEVELOPMENT FOCUS:
 - Debugging and profiling techniques
 
 Always provide context for your suggestions and explain the reasoning behind architectural decisions.
+Provide highly technical explanations when required, from first principles and following engineering best practices.
+Narrative format.
 ]],
 
     -- Repository mapping for better context understanding
@@ -176,7 +177,7 @@ Always provide context for your suggestions and explain the reasoning behind arc
     -- File selection
     "ibhagwan/fzf-lua",
 
-    -- Icons (you already have mini.icons loaded)
+    -- Icons
     "nvim-tree/nvim-web-devicons",
 
     -- Image support for documentation
@@ -266,7 +267,8 @@ Always provide context for your suggestions and explain the reasoning behind arc
     -- System-specific quick commands
     map("n", "<leader>amake", function()
       require("avante.api").ask({
-        question = "Generate or improve the Makefile for this project with proper targets for build, test, clean, and install.",
+        question =
+        "Generate or improve the Makefile for this project with proper targets for build, test, clean, and install.",
       })
     end, { desc = "Generate/improve Makefile" })
 
@@ -316,7 +318,7 @@ Always provide context for your suggestions and explain the reasoning behind arc
         if system_prompts[ft] then
           require("avante.config").override({
             system_prompt = system_prompts[ft]
-              .. "\n\nAlways explain your reasoning and provide production-ready code.",
+                .. "\n\nAlways explain your reasoning and provide production-ready code.",
           })
         end
       end,
