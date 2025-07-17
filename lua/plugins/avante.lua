@@ -16,12 +16,17 @@ return {
       support_paste_from_clipboard = true,
     },
 
-    -- Model configuration
-    gemini = {
-      model = "gemini-2.0-flash-lite",
-      temperature = 0.1,
-      max_tokens = 8192,
-      timeout = 45000,
+    -- NEW: Provider configurations moved under providers field
+    providers = {
+      gemini = {
+        model = "gemini-2.0-flash-lite",
+        timeout = 45000,
+        -- Request body parameters moved to extra_request_body
+        extra_request_body = {
+          temperature = 0.1,
+          max_tokens = 8192,
+        },
+      },
     },
 
     -- Enhanced mappings for development workflow

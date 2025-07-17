@@ -1,3 +1,4 @@
+-- plugins/lsp.lua
 return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
@@ -139,12 +140,11 @@ return {
           end, "[T]oggle Inlay [H]ints")
         end
 
-        -- Auto format on save
-        if client.supports_method("textDocument/formatting") then
+        -- Auto format on save (skip for Java files as JDTLS handles this)
+        if client.supports_method("textDocument/formatting") and vim.bo[event.buf].filetype ~= "java" then
           vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = event.buf,
             callback = function()
-              -- Only format if no other formatter is available
               if vim.g.auto_format ~= false then
                 vim.lsp.buf.format({ bufnr = event.buf })
               end
@@ -176,7 +176,7 @@ return {
       },
     }
 
-    -- Server configurations
+    -- Server configurations (excluding jdtls)
     local servers = {
       clangd = {
         cmd = {
@@ -351,15 +351,19 @@ return {
           },
         },
       },
+      jsonls = {},
+      html = {},
     }
 
     -- Setup mason-tool-installer
     local ensure_installed = vim.tbl_keys(servers)
     vim.list_extend(ensure_installed, {
-      "stylua",
-      "shfmt",
-      "goimports",
-      "asmfmt",
+      "jdtls",              -- Java LSP
+      "stylua",             -- Lua formatter
+      "shfmt",              -- Shell formatter
+      "goimports",          -- Go formatter
+      "asmfmt",             -- Assembly formatter
+      "google-java-format", -- Java formatter (optional)
     })
 
     require("mason-tool-installer").setup({
@@ -374,6 +378,11 @@ return {
       automatic_installation = true,
       handlers = {
         function(server_name)
+          -- Skip jdtls as it's handled separately by nvim-jdtls
+          if server_name == "jdtls" then
+            return
+          end
+
           local server = servers[server_name] or {}
           server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
           require("lspconfig")[server_name].setup(server)
